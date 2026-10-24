@@ -1,0 +1,64 @@
+name: Release
+
+# Crie uma tag (ex.: git tag v0.1.0 && git push origin v0.1.0) para publicar um APK nas Releases do GitHub.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versão (ex.: 0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Versão
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then V="${{ github.event.inputs.version }}"; else V="${GITHUB_REF_NAME#v}"; fi
+          echo "name=$V" >> "$GITHUB_OUTPUT"
+
+      - name: Chave de assinatura (GitHub Secrets)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.NAPLACA_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/naplaca.jks"
+            echo "NAPLACA_KEYSTORE_FILE=$RUNNER_TEMP/naplaca.jks" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Sem NAPLACA_KEYSTORE_BASE64: o APK será assinado com uma chave de debug temporária."
+          fi
+
+      - name: Compilar APK de release
+        env:
+          NAPLACA_KEYSTORE_PASSWORD: ${{ secrets.NAPLACA_KEYSTORE_PASSWORD }}
+          NAPLACA_KEY_ALIAS: ${{ secrets.NAPLACA_KEY_ALIAS }}
+          NAPLACA_KEY_PASSWORD: ${{ secrets.NAPLACA_KEY_PASSWORD }}
+          NAPLACA_VERSION_NAME: ${{ steps.version.outputs.name }}
+          NAPLACA_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          ./gradlew --no-daemon testDebugUnitTest assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "NaPlaca-${{ steps.version.outputs.name }}.apk"
+
+      - name: Publicar release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.name }}
+          name: NaPlaca ${{ steps.version.outputs.name }}
+          generate_release_notes: true
+          files: NaPlaca-${{ steps.version.outputs.name }}.apk
