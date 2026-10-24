@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NaPlaca</string>
+    <string name="channel_live_name">Jogos ao vivo</string>
+    <string name="channel_live_desc">Golos, cartões, intervalo e fim dos jogos que segue</string>
+    <string name="channel_reminder_name">Lembretes de jogos</string>
+    <string name="channel_reminder_desc">Aviso antes do início dos jogos das suas equipas</string>
+</resources>
