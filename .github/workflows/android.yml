@@ -29,7 +29,7 @@ jobs:
 
       - name: Relatórios
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports
           path: |
@@ -38,7 +38,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: APK de debug
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: naplaca-debug-apk
           path: app/build/outputs/apk/debug/*.apk
