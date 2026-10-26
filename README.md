@@ -69,7 +69,7 @@ Guarde o `naplaca.jks` num sítio seguro. **Nunca** o adicione ao repositório (
 
 ## Desenvolvimento
 
-Requisitos: JDK 17 e Android SDK 35 (ou Android Studio).
+Requisitos: JDK 17 e Android SDK 37 (ou um Android Studio recente).
 
 ```bash
 ./gradlew testDebugUnitTest   # testes unitários (mappers, alertas, datas)
